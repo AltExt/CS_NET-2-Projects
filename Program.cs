@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +31,7 @@ namespace CS_NET_2_Projects
 			{
 				"Array Assignment",
 				"Iteration Assignment",
+				"Console App Strings and Integers Assignment",
 				"Exit Application"
 			};
 
@@ -72,6 +74,9 @@ namespace CS_NET_2_Projects
 					break;
 				case 1:
 					IterationConsoleAppAssignment();
+					break;
+				case 2:
+					ConsoleAppStringsAndIntegersAssignemnt();
 					break;
 				default:
 					return false;
@@ -294,6 +299,46 @@ namespace CS_NET_2_Projects
 			Console.WriteLine("Press any button to continue:");
 			Console.ReadKey();
 			Console.Clear();
+		}
+
+		private static void ConsoleAppStringsAndIntegersAssignemnt()
+		{
+			try
+			{
+				List<int> ints = new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+				for (int i = 0; i < ints.Count; i++)
+				{
+					Console.Write(ints[i].ToString());
+					if (i != ints.Count - 1) Console.Write(", ");
+					else Console.Write("\n");
+				}
+
+				Console.WriteLine("Please enter a number for all values to be divided by: ");
+				int divisor = Convert.ToInt32(Console.ReadLine());
+				for (int i = 0; i < ints.Count; i++)
+				{
+					Console.Write((ints[i] / divisor).ToString());
+					if (i != ints.Count - 1) Console.Write(", ");
+					else Console.Write("\n");
+				}
+			}
+			catch (DivideByZeroException ex)
+			{
+				Console.WriteLine("Please don't divide by 0!");
+			}
+			catch (FormatException ex)
+			{
+				Console.WriteLine("Please enter an integer value!");
+			}
+			catch (Exception ex) 
+			{
+				Console.WriteLine(ex.Message);
+			}
+			finally
+			{
+				Console.WriteLine("Press enter to continue.");
+				Console.ReadLine();
+			}
 		}
 
 		private static void ResetConsoleColors()
