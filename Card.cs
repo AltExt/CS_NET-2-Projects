@@ -2,7 +2,7 @@
 
 namespace CS_NET_2_Projects
 {
-	enum CardSuit
+	public enum CardSuit
 	{
 		Spades = 0,
 		Hearts,
@@ -10,7 +10,7 @@ namespace CS_NET_2_Projects
 		Diamonds
 	}
 
-	enum CardFace
+	public enum CardFace
 	{
 		Ace = 1,
 		Two = 2,
@@ -33,6 +33,12 @@ namespace CS_NET_2_Projects
 		{
 			Suit = CardSuit.Spades;
 			Face = CardFace.Ace;
+		}
+
+		public Card(CardSuit suit, CardFace face)
+		{
+			Suit = suit;
+			Face = face;
 		}
 
 		public override string ToString()
