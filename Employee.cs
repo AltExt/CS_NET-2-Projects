@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CS_NET_2_Projects
 {
@@ -24,6 +20,29 @@ namespace CS_NET_2_Projects
 			Console.WriteLine("Quit method called from employee class");
 		}
 
-        public int ID { get; set; }
+		public static bool operator== (Employee e1, Employee e2)
+		{
+			return e1.ID == e2.ID;
+		}
+
+		public static bool operator!= (Employee e1, Employee e2)
+		{
+			return !(e1 == e2);
+		}
+
+
+		// added to stop vs complaining
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		// added to stop vs complaining
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public int ID { get; set; }
     }
 }
