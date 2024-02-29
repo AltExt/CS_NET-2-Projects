@@ -1,17 +1,11 @@
-﻿using System;
+﻿#pragma warning disable CS0168 // Variable is declared but never used
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using MyUtils;
 
 namespace CS_NET_2_Projects
 {
-	internal class Program
+	public class Program
 	{
 		static void Main()
 		{
@@ -23,24 +17,36 @@ namespace CS_NET_2_Projects
 
 		private static void SelectAssignment()
 		{
-			int selection = 0;
-			const int MAX_SELECTION = 2;
-			bool running = true;
 
 			List<string> assignmentNames = new List<string>
 			{
 				"Array Assignment",
 				"Iteration Assignment",
 				"Console App Strings and Integers Assignment",
+				"CallingMethodsAssignment",
 				"Exit Application"
 			};
 
+			int selection = 0;
+			bool running = true;
+
 			while (running)
 			{
+				//Console.WriteLine(">Display"); Console.ReadLine();
 				DisplayAssignmentList(ref assignmentNames);
-				selection = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, MAX_SELECTION);
+				//Console.WriteLine("Done"); Console.ReadLine();
+
+				//Console.WriteLine(">GetSelection"); Console.ReadLine();
+				selection = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, assignmentNames.Count - 1);
+				//Console.WriteLine("Done"); Console.ReadLine();
+
+				//Console.WriteLine(">Running"); Console.ReadLine();
 				running = RunSelectedAssignment(selection, ref assignmentNames);
+				//Console.WriteLine("Done"); Console.ReadLine();
+
+				//Console.WriteLine("Reset Colors"); Console.ReadLine();
 				ResetConsoleColors();
+				//Console.WriteLine("Done"); Console.ReadLine();
 			}
 		}
 
@@ -77,6 +83,9 @@ namespace CS_NET_2_Projects
 					break;
 				case 2:
 					ConsoleAppStringsAndIntegersAssignemnt();
+					break;
+				case 3:
+					CallingMethodsAssignment();
 					break;
 				default:
 					return false;
@@ -120,10 +129,7 @@ namespace CS_NET_2_Projects
 
 			// write each string to the screen
 			for (int i = 0; i < stringArray.Length; i++) Console.WriteLine("stringArray[" + i.ToString() + "]:" + stringArray[i]);
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 
 
 			// Assignment Part 2
@@ -144,10 +150,7 @@ namespace CS_NET_2_Projects
 				Console.WriteLine("This is no longer an infinite loop!");
 				max--;
 			}
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 
 
 			// Assignment Part 3
@@ -171,10 +174,7 @@ namespace CS_NET_2_Projects
 				if (i != REPS - 1) Console.Write(", ");
 				else Console.Write("\n");
 			}
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 
 
 			// Assignment Part 4
@@ -211,10 +211,7 @@ namespace CS_NET_2_Projects
 			{
 				Console.WriteLine("Match found at index " + match.ToString());
 			}
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 
 
 			// Assignment Part 5
@@ -255,10 +252,7 @@ namespace CS_NET_2_Projects
 			{
 				Console.WriteLine("Match found at index " + match.ToString());
 			}
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 
 
 			// Assignment Part 6
@@ -295,10 +289,7 @@ namespace CS_NET_2_Projects
 					Console.WriteLine(testString + "\tThis item is not unique");
 				}
 			}
-
-			Console.WriteLine("Press any button to continue:");
-			Console.ReadKey();
-			Console.Clear();
+			PauseThenClearScreen();
 		}
 
 		private static void ConsoleAppStringsAndIntegersAssignemnt()
@@ -336,15 +327,75 @@ namespace CS_NET_2_Projects
 			}
 			finally
 			{
-				Console.WriteLine("Press enter to continue.");
-				Console.ReadLine();
+				PauseThenClearScreen();
 			}
+#pragma warning restore CS0168 // Variable is declared but never used
 		}
+
+		private static void CallingMethodsAssignment()
+		{
+			// calling methods assignment
+			Console.WriteLine("Part 1:");
+			int n = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
+			Console.WriteLine("AddOne:    " + AddOne(n).ToString());
+			Console.WriteLine("SubOne:    " + SubOne(n).ToString());
+			Console.WriteLine("MultByTwo: " + MultByTwo(n).ToString());
+			PauseThenClearScreen();
+
+
+			// main method assignment
+			Console.WriteLine("Part 2");
+			int x = 10;
+			decimal y = 15.0m;
+			string z = "100";
+			OtherClass otherClass = new OtherClass();
+			Console.WriteLine("Integer: " + otherClass.MathOperation(x).ToString());
+			Console.WriteLine("Decimal: " + otherClass.MathOperation(y).ToString());
+			Console.WriteLine("String:  " + otherClass.MathOperation(z));
+			PauseThenClearScreen();
+
+
+			// method assignment
+			Console.WriteLine("Part 3");
+			int a = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
+			int b = 0;
+			Console.WriteLine("Would you like to enter a second number?(y/n)");
+			if (MyUtils.ConsoleFunctions.GetBoolFromUser())
+			{
+				b = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
+				Console.WriteLine("Reault: " + otherClass.TwoNumberOperation(a, b).ToString());
+			}
+            else
+            {
+				Console.WriteLine("Reault: " + otherClass.TwoNumberOperation(a).ToString());
+			}
+			PauseThenClearScreen();
+
+			// method class assignment
+			Console.WriteLine("Part 4");
+			otherClass.TwoNumbers(5, 10);
+			a = 15;
+			b = 20;
+			otherClass.TwoNumbers(a, b);
+			PauseThenClearScreen();
+
+		}
+
+		private static int AddOne(int i) { return i + 1; }
+		private static int SubOne(int i) { return i - 1; }
+		private static int MultByTwo(int i) { return i * 2; }
 
 		private static void ResetConsoleColors()
 		{
 			Console.BackgroundColor = bgInitialColor;
 			Console.ForegroundColor = fgInitialColor;
+		}
+
+		private static void PauseThenClearScreen()
+		{
+			Console.WriteLine("Press enter button to continue:");
+			Console.ReadLine();
+			Console.Clear();
 		}
 
 		private static ConsoleColor bgInitialColor;
