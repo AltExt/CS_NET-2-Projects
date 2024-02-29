@@ -16,6 +16,11 @@ namespace CS_NET_2_Projects
 			ReturnAllCards();
 		}
 
+		public int RemainingCards()
+		{
+			return cards.Count;
+		}
+
 		public Card GetNextCard()
 		{
 			if (cards.Count == 0)
@@ -35,15 +40,23 @@ namespace CS_NET_2_Projects
 
 		public void Shuffle()
 		{
-			cards.Clear();
-			cards = returnedCards;
+			if (returnedCards.Count != 0)
+			{
+				for (int i = 0; i < returnedCards.Count; i++)
+				{
+					cards.Add(returnedCards[i]);
+				}
+			}
 			returnedCards.Clear();
 
 			Random random = new Random();
-			for (int i = 0; i < cards.Count; i++)
+			for (int j = 0; j < 5; j++)
 			{
-				int rand = random.Next(0, cards.Count - 1);
-				(cards[i], cards[rand]) = (cards[rand], cards[i]);
+				for (int i = 0; i < cards.Count; i++)
+				{
+					int rand = random.Next(0, cards.Count - 1);
+					(cards[i], cards[rand]) = (cards[rand], cards[i]);
+				}
 			}
 		}
 

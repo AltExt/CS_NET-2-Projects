@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace CS_NET_2_Projects
 {
-	public class BlackjackGame: Game
+	public interface IQuittable
 	{
-		public override void Play()
-		{
-			throw new NotImplementedException();
-		}
+		void Quit();
 	}
 }

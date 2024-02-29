@@ -12,6 +12,22 @@ namespace CS_NET_2_Projects
 
 			AssignmentViewer viewer = new AssignmentViewer();
 			viewer.Run();
+
+			Deck Cards = new Deck();
+			while (Cards.RemainingCards() > 0)
+			{
+				Console.WriteLine(Cards.GetNextCard().ToString());
+			}
+			MyUtils.ConsoleFunctions.WaitForEnter();
+
+			Cards.ReturnAllCards();
+			Cards.Shuffle();
+
+			while (Cards.RemainingCards() > 0)
+			{
+				Console.WriteLine(Cards.GetNextCard().ToString());
+			}
+			MyUtils.ConsoleFunctions.WaitForEnter();
 		}
 	}
 }

@@ -50,8 +50,11 @@
     <Compile Include="BlackjackGame.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="Deck.cs" />
+    <Compile Include="Employee.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="IQuittable.cs" />
     <Compile Include="OtherClass.cs" />
+    <Compile Include="Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

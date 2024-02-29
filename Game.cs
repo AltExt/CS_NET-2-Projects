@@ -6,18 +6,20 @@ using System.Threading.Tasks;
 
 namespace CS_NET_2_Projects
 {
-	public class Game
+	public abstract class Game
 	{
-        public List<string> Players { get; set; }
-        public string Name { get; set; }
-        public string Dealer { get; set; }
+		public List<string> Players { get; set; }
+		public string Name { get; set; }
+		public string Dealer { get; set; }
 
-        public void ListPlayers()
-        {
-            Console.WriteLine(Name);
-            Console.WriteLine("Dealer: " + Dealer);
-            Console.WriteLine("Players: ");
-            foreach(string player in Players) Console.WriteLine("\t" + player);
-        }
-    }
+		public abstract void Play();
+
+		public void ListPlayers()
+		{
+			Console.WriteLine(Name);
+			Console.WriteLine("Dealer: " + Dealer);
+			Console.WriteLine("Players: ");
+			foreach(string player in Players) Console.WriteLine("\t" + player);
+		}
+	}
 }

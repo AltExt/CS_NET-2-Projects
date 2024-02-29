@@ -44,7 +44,7 @@ namespace CS_NET_2_Projects
 		public override string ToString()
 		{
 			string output = string.Empty;
-			output += faceValues[Convert.ToInt32(Face)] + " of ";
+			output += faceValues[Convert.ToInt32(Face)-1] + " of ";
 
 			switch (Suit)
 			{

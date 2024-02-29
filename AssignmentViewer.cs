@@ -14,6 +14,7 @@ namespace CS_NET_2_Projects
 		IterationAssignment,
 		ConsoleAppStringsAndIntegersAssignment,
 		CallingMethodsAssignment,
+		MethodsAndObjectsAssignment,
 		ExitApplication
 	}
 
@@ -22,6 +23,10 @@ namespace CS_NET_2_Projects
 		public AssignmentViewer()
 		{
 			mSelectedAssignment = Assignment.ArrayAssignment;
+			for (int i = 0; i < Convert.ToInt32(Assignment.ExitApplication) + 1; i++)
+			{
+				mAssignmentNames.Add( Enum.GetName(typeof(Assignment), i) );
+			}
 		}
 
 		public void Run()
@@ -43,7 +48,11 @@ namespace CS_NET_2_Projects
 
 		private void GetUserSelection()
 		{
-			mSelectedAssignment = (Assignment)(MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, Convert.ToInt32(Assignment.ExitApplication) - 1));
+			Console.WriteLine("Assignment List: ");
+			for (int i = 0; i < mAssignmentNames.Count; i++) Console.WriteLine("\t" + i.ToString() + ": " + mAssignmentNames[i]);
+			Console.WriteLine("====================");
+
+            mSelectedAssignment = (Assignment)(MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, Convert.ToInt32(Assignment.ExitApplication)));
 		}
 
 		private bool ViewSelectedAssignment()
@@ -61,6 +70,9 @@ namespace CS_NET_2_Projects
 					break;
 				case Assignment.CallingMethodsAssignment:
 					CallingMethodsAssignment();
+					break;
+				case Assignment.MethodsAndObjectsAssignment:
+					MethodsAndObjectsAssignment();
 					break;
 				case Assignment.ExitApplication:
 					return false;
@@ -269,7 +281,6 @@ namespace CS_NET_2_Projects
 					Console.WriteLine(testString + "\tThis item is not unique");
 				}
 			}
-			ClearScreen();
 		}
 
 		private void ConsoleAppStringsAndIntegersAssignment()
@@ -304,10 +315,6 @@ namespace CS_NET_2_Projects
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
-			}
-			finally
-			{
-				ClearScreen();
 			}
 		}
 
@@ -356,13 +363,22 @@ namespace CS_NET_2_Projects
 			a = 15;
 			b = 20;
 			otherClass.TwoNumbers(a, b);
-			ClearScreen();
+		}
+
+		private void MethodsAndObjectsAssignment()
+		{
+			// create employee
+			Employee e = new Employee("Sample", "Student", 0);
+
+			// call sayname
+			e.SayName();
 		}
 
 		private static int AddOne(int i) { return i + 1; }
 		private static int SubOne(int i) { return i - 1; }
 		private static int MultByTwo(int i) { return i * 2; }
 
+		private readonly List<string> mAssignmentNames = new List<string>();
 		private Assignment mSelectedAssignment = Assignment.ArrayAssignment;
 	}
 }
