@@ -2,9 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CS_NET_2_Projects
 {
@@ -368,10 +365,18 @@ namespace CS_NET_2_Projects
 		private void MethodsAndObjectsAssignment()
 		{
 			// create employee
-			Employee e = new Employee("Sample", "Student", 0);
+			Employee e1 = new Employee("Sample", "Student", 0);
+			Employee e2 = new Employee("Other", "Employee", 1);
 
 			// call sayname
-			e.SayName();
+			e1.SayName();
+
+			// polymorphism
+			e1.Quit();
+
+			// operator overloading
+			if (e1 == e2) Console.WriteLine("e1 == e2");
+			else Console.WriteLine("e1 != e2");
 		}
 
 		private static int AddOne(int i) { return i + 1; }
