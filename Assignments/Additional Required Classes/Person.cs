@@ -1,5 +1,6 @@
 ﻿using System;
-namespace CS_NET_2_Projects
+
+namespace CS_NET_2_Projects.Assignments.Additional_Required_Classes
 {
 	public abstract class Person
 	{

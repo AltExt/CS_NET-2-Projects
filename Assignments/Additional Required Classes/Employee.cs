@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace CS_NET_2_Projects
+namespace CS_NET_2_Projects.Assignments.Additional_Required_Classes
 {
 	public class Employee: Person, IQuittable
 	{
-		public Employee(string fName, string lName, int id) : base(fName, lName)
+		public Employee(string fName, string lName, int id = 0) : base(fName, lName)
 		{
 			ID = id;
 		}
@@ -17,7 +17,7 @@ namespace CS_NET_2_Projects
 
 		public void Quit()
 		{
-			Console.WriteLine("Quit method called from employee class");
+			Console.WriteLine("Employee Quit() called");
 		}
 
 		public static bool operator== (Employee e1, Employee e2)

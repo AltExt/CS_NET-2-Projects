@@ -1,29 +1,102 @@
-﻿#pragma warning disable CS0168 // Variable is declared but never used
-
+﻿using CS_NET_2_Projects.Assignments;
 using System;
 using System.Collections.Generic;
 
 namespace CS_NET_2_Projects
 {
-	public enum Assignment
-	{
-		ArrayAssignment = 0,
-		IterationAssignment,
-		ConsoleAppStringsAndIntegersAssignment,
-		CallingMethodsAssignment,
-		MethodsAndObjectsAssignment,
-		ExitApplication
+	public enum ConsoleAppKeyAction
+	{ 
+		NoAciton,
+		RunSelected,
+		Quit
 	}
 
 	public class AssignmentViewer
 	{
 		public AssignmentViewer()
 		{
-			mSelectedAssignment = Assignment.ArrayAssignment;
-			for (int i = 0; i < Convert.ToInt32(Assignment.ExitApplication) + 1; i++)
+			// add all assignments to the list
+			assignments.Add(new ArrayAssignment());
+			assignments.Add(new IterationSixPartAssignment());
+			assignments.Add(new ConsoleAppStringsAndIntegersAssignment());
+			assignments.Add(new CallingMethodsAssignment());
+			assignments.Add(new MainMethodAssignment());
+			assignments.Add(new MethodAssignment());
+			assignments.Add(new MethodClassAssignment());
+			assignments.Add(new ClassMethodAssignment());
+			assignments.Add(new MethodsAndObjectsAssignment());
+			assignments.Add(new AbstractClassAssignment());
+			assignments.Add(new PolymorphismAssignment());
+			assignments.Add(new OperatorAssignment());
+			assignments.Add(new ParametersAssignment());
+			assignments.Add(new ParsingEnumsAssignment());
+			assignments.Add(new StructAssignment());
+			assignments.Add(new LambdaExpressionAssignment());
+
+			// get initial console colors
+			BGInitialColor = Console.BackgroundColor;
+			FGInitialColor = Console.ForegroundColor;
+
+			// figure out the max length of the assignment name and the module name to line everything up
+			string menuNameHeading = "Assignment Name";
+			string menuModuleHeading = "Module";
+
+			int nameMaxSize = menuNameHeading.Length;
+			int moduleMaxSize = menuModuleHeading.Length;
+			for (int i = 0; i < assignments.Count; i++)
 			{
-				mAssignmentNames.Add( Enum.GetName(typeof(Assignment), i) );
+				if (assignments[i].Name.Length > nameMaxSize) nameMaxSize = assignments[i].Name.Length;
+				if (assignments[i].Module.Length > moduleMaxSize) moduleMaxSize = assignments[i].Module.Length;
 			}
+
+			// this allows me to have [i]: on each line
+			nameMaxSize += "iii: ".Length;
+
+			// create the main menu heading that will be displayed
+			while (menuNameHeading.Length < nameMaxSize) menuNameHeading += ' ';
+			while (menuModuleHeading.Length < moduleMaxSize) menuModuleHeading += ' ';
+			string menuSubmissionRequiredHeading = "Submission Required";
+
+			// define consistant tab and newline strings
+			string tabString = "  |  ";
+			string newLineString = "\n";
+
+			MainMenuHeading = menuNameHeading + tabString + menuModuleHeading + tabString + menuSubmissionRequiredHeading + newLineString;
+			int len = MainMenuHeading.Length;
+			for (int i = 0; i < len; i++)
+			{
+				MainMenuHeading += "=";
+			}
+			MainMenuHeading += newLineString;
+
+			int maxLineStrLen = 0;
+			for (int i = 0; i < assignments.Count; i++)
+			{
+				// write the name + spacing so everything lines up
+				string name = i.ToString() + ": " + assignments[i].Name;
+				while (name.Length < nameMaxSize) name += ' ';
+
+				// write the module + spacing so everything lins up
+				string module =  assignments[i].Module;
+				while (module.Length < moduleMaxSize) module += ' ';
+
+				// add the submission required string
+				string requiredString = assignments[i].SubmissionRequired ? ("Required") : ("Not Required");
+
+				// create a single line from above strings
+				string lineStr = name + tabString + module + tabString + requiredString + newLineString;
+
+				// track the maxLen of these strings
+				if (lineStr.Length > maxLineStrLen) maxLineStrLen = lineStr.Length;
+
+				// add to main menu list
+				MainMenu.Add(lineStr);
+			}
+			
+			// create the footer
+			MainMenuFooter = "";
+			while (MainMenuFooter.Length < maxLineStrLen) MainMenuFooter += "=";
+			MainMenuFooter += newLineString;
 		}
 
 		public void Run()
@@ -32,6 +105,9 @@ namespace CS_NET_2_Projects
 
 			while (running)
 			{
+				// display assignment list
+				DisplayMainMenu();
+
 				// select assignment
 				GetUserSelection();
 
@@ -43,347 +119,90 @@ namespace CS_NET_2_Projects
 			}
 		}
 
+		private void DisplayMainMenu()
+		{
+			Console.Clear();
+			Console.Write(MainMenuHeading);
+			for (int i = 0; i < MainMenu.Count; i++)
+			{
+				if (i == CurrentAssignment)
+				{
+					Console.BackgroundColor = ConsoleColor.White;
+					Console.ForegroundColor = ConsoleColor.Black;
+				}
+				Console.Write(MainMenu[i]);
+				if (i == CurrentAssignment)
+				{
+					Console.BackgroundColor = BGInitialColor;
+					Console.ForegroundColor = FGInitialColor;
+				}
+			}
+			Console.Write(MainMenuFooter);
+		}
+
 		private void GetUserSelection()
 		{
-			Console.WriteLine("Assignment List: ");
-			for (int i = 0; i < mAssignmentNames.Count; i++) Console.WriteLine("\t" + i.ToString() + ": " + mAssignmentNames[i]);
-			Console.WriteLine("====================");
+			ConsoleKey pressedKey = MyUtils.ConsoleFunctions.GetConsoleKeyFromUser();
 
-            mSelectedAssignment = (Assignment)(MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, Convert.ToInt32(Assignment.ExitApplication)));
+			keyAction = ConsoleAppKeyAction.NoAciton;
+
+			switch (pressedKey)
+			{
+				case ConsoleKey.UpArrow:
+					CurrentAssignment--;
+					if (CurrentAssignment == -1) CurrentAssignment = assignments.Count - 1;
+					break;
+				case ConsoleKey.DownArrow:
+					CurrentAssignment++;
+					if (CurrentAssignment == assignments.Count) CurrentAssignment = 0;
+					break;
+				case ConsoleKey.Enter:
+					keyAction = ConsoleAppKeyAction.RunSelected;
+					break;
+				case ConsoleKey.Q:
+				case ConsoleKey.Escape:
+					keyAction = ConsoleAppKeyAction.Quit;
+					break;
+			}
 		}
 
 		private bool ViewSelectedAssignment()
 		{
-			switch (mSelectedAssignment)
+			/**/ if (keyAction == ConsoleAppKeyAction.Quit)
 			{
-				case Assignment.ArrayAssignment:
-					ArrayAssignment();
-					break;
-				case Assignment.IterationAssignment:
-					IterationAssignment();
-					break;
-				case Assignment.ConsoleAppStringsAndIntegersAssignment:
-					ConsoleAppStringsAndIntegersAssignment();
-					break;
-				case Assignment.CallingMethodsAssignment:
-					CallingMethodsAssignment();
-					break;
-				case Assignment.MethodsAndObjectsAssignment:
-					MethodsAndObjectsAssignment();
-					break;
-				case Assignment.ExitApplication:
-					return false;
+				return false;
 			}
+			else if (keyAction == ConsoleAppKeyAction.RunSelected)
+			{
+				ClearScreen();
+				assignments[CurrentAssignment].Run();
+				Pause();
+				ClearScreen();
+			}
+
 			return true;
 		}
 
 		private void ClearScreen()
 		{
-			MyUtils.ConsoleFunctions.WaitForEnter(true);
+			Console.Clear();
 		}
 
-		private void ArrayAssignment()
+		private void Pause()
 		{
-			// instansiate and initialise string array, get index from the user and display to screen
-			string[] stringArray = { "string0", "string1", "string2", "string3", "string4" };
-			int selection = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, stringArray.Length);
-			Console.WriteLine("You chose strinArray[" + selection.ToString() + "]\nContains: " + stringArray[selection]);
-
-			// same as above for an int array
-			int[] intArray = { 9, 8, 7, 3, 2, 1, 4, 5, 6 };
-			selection = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, intArray.Length);
-			Console.WriteLine("You chose stringArray[" + selection.ToString() + "]\nContains: " + intArray[selection]);
-
-			// same as above for an string list, for loop to initialise list with "string0", "string1"...
-			List<string> stringList = new List<string>();
-			for (int i = 0; i < 5; i++) stringList.Add("string" + i.ToString());
-			selection = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, stringList.Count - 1);
-			Console.WriteLine("You chose stringList[" + selection.ToString() + "]\nContains: " + stringList[selection]);
+			MyUtils.ConsoleFunctions.WaitForEnter();
 		}
 
-		private void IterationAssignment()
-		{
-			// Assignment Part 1
-			Console.WriteLine("Assignment Part 1:");
+		private int CurrentAssignment = 0;
+		private ConsoleAppKeyAction keyAction = ConsoleAppKeyAction.NoAciton;
 
-			// instantiate and initialise string array
-			string[] stringArray = new string[5];
-			for (int i = 0; i < stringArray.Length; i++) stringArray[i] = "string" + i.ToString() + "\t>";
-
-			// get user string input
-			string userInput = MyUtils.ConsoleFunctions.GetTextFromUser();
-
-			// append user input to each string
-			for (int i = 0; i < stringArray.Length; i++) stringArray[i] += userInput;
-
-			// write each string to the screen
-			for (int i = 0; i < stringArray.Length; i++) Console.WriteLine("stringArray[" + i.ToString() + "]:" + stringArray[i]);
-			ClearScreen();
-
-
-			// Assignment Part 2
-			Console.WriteLine("Assignment Part 2");
-
-			// Create an infinite loop
-			/*
-			while (true)
-			{
-				Console.WriteLine("This is an infinite loop!");
-			}
-			*/
-
-			// Fix the loop by adding an exit condition
-			int max = 10;
-			while (max >= 0)
-			{
-				Console.WriteLine("This is no longer an infinite loop!");
-				max--;
-			}
-			ClearScreen();
-
-
-			// Assignment Part 3
-			Console.WriteLine("Assignment Part 3");
-
-			// Loop using < operator
-			Console.WriteLine("Loop using < operator");
-			const int REPS = 5;
-			for (int i = 0; i < REPS; i++)
-			{
-				Console.Write(i.ToString());
-				if (i != REPS - 1) Console.Write(", ");
-				else Console.Write("\n");
-			}
-
-			// Loop using <= operator
-			Console.WriteLine("Loop using <= operator");
-			for (int i = 0; i <= 4; i++)
-			{
-				Console.Write(i.ToString());
-				if (i != REPS - 1) Console.Write(", ");
-				else Console.Write("\n");
-			}
-			ClearScreen();
-
-
-			// Assignment Part 4
-			Console.WriteLine("Assignment Part 4");
-
-			// Create list of unique strings
-			List<string> uniqueStrings = new List<string>
-			{
-				"Alice",
-				"Bob",
-				"Charlie"
-			};
-
-			// get user input
-			string userinput = MyUtils.ConsoleFunctions.GetTextFromUser("Enter a name to search:");
-
-			// loop over list and break if a matching stirng to userinput is found
-			int match = -1;
-			for (int i = 0; i < uniqueStrings.Count; i++)
-			{
-				if (userinput == uniqueStrings[i])
-				{
-					match = i;
-					break;
-				}
-			}
-
-			// match will still be -1 if no matching string is found
-			if (match == -1)
-			{
-				Console.WriteLine("No match for '" + userinput + "' found in the list.");
-			}
-			else
-			{
-				Console.WriteLine("Match found at index " + match.ToString());
-			}
-			ClearScreen();
-
-
-			// Assignment Part 5
-			Console.WriteLine("Assignment Part 5");
-
-			// Create list of non unique strings
-			List<string> nonUniqueStrings = new List<string>
-			{
-				"Alice",
-				"Bob",
-				"Charlie",
-				"Bob",
-				"Charlie",
-				"David"
-			};
-
-			// get user input
-			userinput = MyUtils.ConsoleFunctions.GetTextFromUser("Enter a name to search:");
-
-			// loop over list and break if a matching stirng to userinput is found
-			match = -1;
-			for (int i = 0; i < nonUniqueStrings.Count; i++)
-			{
-				// this will break and return the first matching index to userinput
-				if (userinput == nonUniqueStrings[i])
-				{
-					match = i;
-					break;
-				}
-			}
-
-			// match will still be -1 if no matching string is found
-			if (match == -1)
-			{
-				Console.WriteLine("No match for '" + userinput + "' found in the list.");
-			}
-			else
-			{
-				Console.WriteLine("Match found at index " + match.ToString());
-			}
-			ClearScreen();
-
-
-			// Assignment Part 6
-			Console.WriteLine("Assignment Part 6");
-
-			// re using the unique and non unique list from previous part
-			uniqueStrings = new List<string>();
-
-			// loop over each non unique element
-			foreach (string testString in nonUniqueStrings)
-			{
-				match = 0;
-
-				// loop over each known unique element to compare
-				foreach (string uniqueString in uniqueStrings)
-				{
-					// if they match we don't need to go any further
-					if (testString == uniqueString)
-					{
-						match = 1;
-						break;
-					}
-				}
-
-				// if there is no match add that item to the unique elememt list
-				if (match == 0)
-				{
-					Console.WriteLine(testString + "\tThis item is unique");
-					uniqueStrings.Add(testString);
-				}
-				// otherwise inform user of a match
-				else
-				{
-					Console.WriteLine(testString + "\tThis item is not unique");
-				}
-			}
-		}
-
-		private void ConsoleAppStringsAndIntegersAssignment()
-		{
-			try
-			{
-				List<int> ints = new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-				for (int i = 0; i < ints.Count; i++)
-				{
-					Console.Write(ints[i].ToString());
-					if (i != ints.Count - 1) Console.Write(", ");
-					else Console.Write("\n");
-				}
-
-				Console.WriteLine("Please enter a number for all values to be divided by: ");
-				int divisor = Convert.ToInt32(Console.ReadLine());
-				for (int i = 0; i < ints.Count; i++)
-				{
-					Console.Write((ints[i] / divisor).ToString());
-					if (i != ints.Count - 1) Console.Write(", ");
-					else Console.Write("\n");
-				}
-			}
-			catch (DivideByZeroException ex)
-			{
-				Console.WriteLine("Please don't divide by 0!");
-			}
-			catch (FormatException ex)
-			{
-				Console.WriteLine("Please enter an integer value!");
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-			}
-		}
-
-		private void CallingMethodsAssignment()
-		{
-			// calling methods assignment
-			Console.WriteLine("Part 1:");
-			int n = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
-			Console.WriteLine("AddOne:    " + AddOne(n).ToString());
-			Console.WriteLine("SubOne:    " + SubOne(n).ToString());
-			Console.WriteLine("MultByTwo: " + MultByTwo(n).ToString());
-			ClearScreen();
-
-
-			// main method assignment
-			Console.WriteLine("Part 2");
-			int x = 10;
-			decimal y = 15.0m;
-			string z = "100";
-			OtherClass otherClass = new OtherClass();
-			Console.WriteLine("Integer: " + otherClass.MathOperation(x).ToString());
-			Console.WriteLine("Decimal: " + otherClass.MathOperation(y).ToString());
-			Console.WriteLine("String:  " + otherClass.MathOperation(z));
-			ClearScreen();
-
-
-			// method assignment
-			Console.WriteLine("Part 3");
-			int a = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
-			int b = 0;
-			Console.WriteLine("Would you like to enter a second number?(y/n)");
-			if (MyUtils.ConsoleFunctions.GetBoolFromUser())
-			{
-				b = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100);
-				Console.WriteLine("Reault: " + otherClass.TwoNumberOperation(a, b).ToString());
-			}
-			else
-			{
-				Console.WriteLine("Reault: " + otherClass.TwoNumberOperation(a).ToString());
-			}
-			ClearScreen();
-
-			// method class assignment
-			Console.WriteLine("Part 4");
-			otherClass.TwoNumbers(5, 10);
-			a = 15;
-			b = 20;
-			otherClass.TwoNumbers(a, b);
-		}
-
-		private void MethodsAndObjectsAssignment()
-		{
-			// create employee
-			Employee e1 = new Employee("Sample", "Student", 0);
-			Employee e2 = new Employee("Other", "Employee", 1);
-
-			// call sayname
-			e1.SayName();
-
-			// polymorphism
-			e1.Quit();
-
-			// operator overloading
-			if (e1 == e2) Console.WriteLine("e1 == e2");
-			else Console.WriteLine("e1 != e2");
-		}
-
-		private static int AddOne(int i) { return i + 1; }
-		private static int SubOne(int i) { return i - 1; }
-		private static int MultByTwo(int i) { return i * 2; }
-
-		private readonly List<string> mAssignmentNames = new List<string>();
-		private Assignment mSelectedAssignment = Assignment.ArrayAssignment;
+		private readonly List<Assignment> assignments = new List<Assignment>();
+		private readonly List<string> MainMenu = new List<string>();
+		
+		private readonly string MainMenuHeading = "";
+		private readonly string MainMenuFooter = "";
+		
+		private readonly ConsoleColor BGInitialColor;
+		private readonly ConsoleColor FGInitialColor;
 	}
 }

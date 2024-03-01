@@ -46,15 +46,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assignments\AbstractClassAssignment.cs" />
+    <Compile Include="Assignments\Additional Required Classes\EmployeeGeneric.cs" />
+    <Compile Include="Assignments\Additional Required Classes\Employee_FromAbstract.cs" />
+    <Compile Include="Assignments\Additional Required Classes\Person_Abstract.cs" />
+    <Compile Include="Assignments\ArrayAssignment.cs" />
+    <Compile Include="Assignments\Assignment.cs" />
+    <Compile Include="Assignments\CallingMethodsAssignment.cs" />
+    <Compile Include="Assignments\ClassMethodAssignment.cs" />
+    <Compile Include="Assignments\ConsoleAppStringsAndIntegersAssignment.cs" />
+    <Compile Include="Assignments\IterationSixPartAssignment.cs" />
+    <Compile Include="Assignments\LambdaExpressionAssignment.cs" />
+    <Compile Include="Assignments\MainMethodAssignment.cs" />
+    <Compile Include="Assignments\MethodAssignment.cs" />
+    <Compile Include="Assignments\MethodClassAssignment.cs" />
+    <Compile Include="Assignments\Additional Required Classes\StaticClass.cs" />
+    <Compile Include="Assignments\MethodsAndObjectsAssignment.cs" />
+    <Compile Include="Assignments\OperatorAssignment.cs" />
+    <Compile Include="Assignments\ParametersAssignment.cs" />
+    <Compile Include="Assignments\ParsingEnumsAssignment.cs" />
+    <Compile Include="Assignments\PolymorphismAssignment.cs" />
+    <Compile Include="Assignments\StructAssignment.cs" />
     <Compile Include="AssignmentViewer.cs" />
     <Compile Include="BlackjackGame.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="Deck.cs" />
-    <Compile Include="Employee.cs" />
+    <Compile Include="Assignments\Additional Required Classes\Employee.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="IQuittable.cs" />
-    <Compile Include="OtherClass.cs" />
-    <Compile Include="Person.cs" />
+    <Compile Include="Assignments\Additional Required Classes\IQuittable.cs" />
+    <Compile Include="Assignments\Additional Required Classes\OtherClass.cs" />
+    <Compile Include="Assignments\Additional Required Classes\Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
