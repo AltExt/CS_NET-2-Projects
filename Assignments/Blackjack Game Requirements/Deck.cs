@@ -5,9 +5,9 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CS_NET_2_Projects
+namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 {
-	internal class Deck
+	public class Deck
 	{
 		public Deck() 
 		{
@@ -38,7 +38,7 @@ namespace CS_NET_2_Projects
 			returnedCards.Add(card);
 		}
 
-		public void Shuffle()
+		public void Shuffle(int numTimesToShuffle = 5)
 		{
 			if (returnedCards.Count != 0)
 			{
@@ -50,7 +50,7 @@ namespace CS_NET_2_Projects
 			returnedCards.Clear();
 
 			Random random = new Random();
-			for (int j = 0; j < 5; j++)
+			for (int j = 0; j < numTimesToShuffle; j++)
 			{
 				for (int i = 0; i < cards.Count; i++)
 				{
@@ -73,7 +73,7 @@ namespace CS_NET_2_Projects
 			}
 		}
 
-		private List<Card> cards;
+		private readonly List<Card> cards;
 		private readonly List<Card> returnedCards;
 	}
 }

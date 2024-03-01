@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CS_NET_2_Projects
+namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 {
 	public enum CardSuit
 	{
@@ -44,23 +44,10 @@ namespace CS_NET_2_Projects
 		public override string ToString()
 		{
 			string output = string.Empty;
-			output += faceValues[Convert.ToInt32(Face)-1] + " of ";
 
-			switch (Suit)
-			{
-				case CardSuit.Spades:
-					output += "Spades";
-					break;
-				case CardSuit.Hearts:
-					output += "Hearts";
-					break;
-				case CardSuit.Clubs:
-					output += "Clubs";
-					break;
-				case CardSuit.Diamonds:
-					output += "Diamonds";
-					break;
-			}
+			output += Enum.GetName(typeof(CardFace), Face);
+			output += " of ";
+			output += Enum.GetName(typeof(CardSuit), Suit);
 
 			return output;
 		}
@@ -81,7 +68,5 @@ namespace CS_NET_2_Projects
 
 		private CardSuit Suit { get; set; }
 		private CardFace Face { get; set; }
-
-		private static readonly string[] faceValues = { "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };
 	}
 }

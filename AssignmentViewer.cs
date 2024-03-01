@@ -32,6 +32,7 @@ namespace CS_NET_2_Projects
 			assignments.Add(new ParsingEnumsAssignment());
 			assignments.Add(new StructAssignment());
 			assignments.Add(new LambdaExpressionAssignment());
+			assignments.Add(new BlackjackGameAssignment());
 
 			// get initial console colors
 			BGInitialColor = Console.BackgroundColor;
