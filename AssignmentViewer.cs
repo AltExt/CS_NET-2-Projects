@@ -103,6 +103,9 @@ namespace CS_NET_2_Projects
 		{
 			bool running = true;
 
+			Console.WriteLine("Use up/down arrow keys to navigate list, enter to select, q or esc to exit.");
+			Pause();
+
 			while (running)
 			{
 				// display assignment list
@@ -142,7 +145,7 @@ namespace CS_NET_2_Projects
 
 		private void GetUserSelection()
 		{
-			ConsoleKey pressedKey = MyUtils.ConsoleFunctions.GetConsoleKeyFromUser();
+			ConsoleKey pressedKey = Console.ReadKey(intercept: true).Key;
 
 			keyAction = ConsoleAppKeyAction.NoAciton;
 
