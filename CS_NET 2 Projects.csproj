@@ -56,6 +56,7 @@
     <Compile Include="Assignments\Blackjack Game Requirements\BlackJackPlayer.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\Dealer.cs" />
     <Compile Include="Assignments\BlackjackGameAssignment.cs" />
+    <Compile Include="Assignments\BlackJackGameAssignment_Rev2.cs" />
     <Compile Include="Assignments\CallingMethodsAssignment.cs" />
     <Compile Include="Assignments\ClassMethodAssignment.cs" />
     <Compile Include="Assignments\ConsoleAppStringsAndIntegersAssignment.cs" />

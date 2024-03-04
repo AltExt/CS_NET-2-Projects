@@ -18,7 +18,7 @@ namespace CS_NET_2_Projects.Assignments
 
 			// declare variables and call method using them
 			int a = 15; int b = 20;
-			otherClass.TwoNumbers(a, b);
+			otherClass.TwoNumbers(x: a, y: b);
 		}
 	}
 }

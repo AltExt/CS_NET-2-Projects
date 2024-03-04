@@ -66,7 +66,7 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 			else return 1;
 		}
 
-		private CardSuit Suit { get; set; }
-		private CardFace Face { get; set; }
+		public CardSuit Suit { get; set; }
+		public CardFace Face { get; set; }
 	}
 }

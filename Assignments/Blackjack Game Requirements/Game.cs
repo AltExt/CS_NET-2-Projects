@@ -12,7 +12,7 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 			Console.WriteLine(Name);
 			Console.WriteLine("Dealer: " + TheDealer.Name);
 			Console.WriteLine("Players: ");
-			foreach(BlackJackPlayer p in Players) Console.WriteLine("\t" + p.Name);
+			foreach(CardGameBasePlayer p in Players) Console.WriteLine("\t" + p.Name);
 		}
 
 		public string Name { get; set; }
