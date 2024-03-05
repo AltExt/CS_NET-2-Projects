@@ -52,11 +52,11 @@
     <Compile Include="Assignments\Additional Required Classes\Person_Abstract.cs" />
     <Compile Include="Assignments\ArrayAssignment.cs" />
     <Compile Include="Assignments\Assignment.cs" />
+    <Compile Include="Assignments\Blackjack Game Requirements\BlackJackGame.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\CardGameBasePlayer.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\BlackJackPlayer.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\Dealer.cs" />
-    <Compile Include="Assignments\BlackjackGameAssignment.cs" />
-    <Compile Include="Assignments\BlackJackGameAssignment_Rev2.cs" />
+    <Compile Include="Assignments\BlackJackGameAssignment.cs" />
     <Compile Include="Assignments\CallingMethodsAssignment.cs" />
     <Compile Include="Assignments\ClassMethodAssignment.cs" />
     <Compile Include="Assignments\ConsoleAppStringsAndIntegersAssignment.cs" />
@@ -73,7 +73,6 @@
     <Compile Include="Assignments\PolymorphismAssignment.cs" />
     <Compile Include="Assignments\StructAssignment.cs" />
     <Compile Include="AssignmentViewer.cs" />
-    <Compile Include="Assignments\Blackjack Game Requirements\BlackjackGame.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\Card.cs" />
     <Compile Include="Assignments\Blackjack Game Requirements\Deck.cs" />
     <Compile Include="Assignments\Additional Required Classes\Employee.cs" />

@@ -29,16 +29,13 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 
 	public class Card
 	{
-		public Card()
-		{
-			Suit = CardSuit.Spades;
-			Face = CardFace.Ace;
-		}
+		public Card(): this(CardSuit.Spades, CardFace.Ace) { }
 
 		public Card(CardSuit suit, CardFace face)
 		{
 			Suit = suit;
 			Face = face;
+			Value = 0;
 		}
 
 		public override string ToString()
@@ -68,5 +65,6 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 
 		public CardSuit Suit { get; set; }
 		public CardFace Face { get; set; }
-	}
+        public int Value { get; set; }
+    }
 }

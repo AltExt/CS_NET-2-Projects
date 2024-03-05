@@ -2,18 +2,18 @@
 
 namespace CS_NET_2_Projects.Assignments
 {
-	public class BlackjackGameAssignment: Assignment
+	public class BlackJackGameAssignment: Assignment
 	{
-		public BlackjackGameAssignment():base("Blackjack Game", "7:A", true) 
+		public BlackJackGameAssignment(): base("BlackJack Game", "7:A", true)
 		{
-			TheGame = new BlackjackGame();
+			game = new BlackJackGame();
 		}
 
 		public override void Run()
 		{
-			TheGame.Play();
+			game.Play();
 		}
 
-		private BlackjackGame TheGame;
+		private readonly Game game;
 	}
 }

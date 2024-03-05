@@ -5,550 +5,526 @@ using System.Threading;
 
 namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 {
-	public class BlackjackGame: Game
+	public class BlackJackGame: Game
 	{
-		public BlackjackGame()
+		// properties
+		private int Round { get; set; }
+		private int MinBuyIn { get; set; }
+		private int TargetValue { get; set; }
+		private int DealerCutOff { get; set; }
+		private int CurrentPlayer { get; set; }
+
+		// Draw properties
+		private int ColWidth { get; set; }
+		private int HandColHeight { get; set; }
+		private bool GridDrawn { get; set; }
+
+
+		public BlackJackGame()
 		{
-			MyUtils.ConsoleFunctions.SetInitialConsoleColors();
+			Round = 1;
+			MinBuyIn = 5;
 			CurrentPlayer = 0;
-			TabString = "  |  ";
-			ColWidth = new Card(CardSuit.Diamonds, CardFace.Queen).ToString().Length + 6;
+			TargetValue = 21;
+			DealerCutOff = 17;
+			GridDrawn = false;
+			ColWidth = new Card(CardSuit.Diamonds, CardFace.Queen).ToString().Length + 10; // wide enough for everything
+			Players = new List<CardGameBasePlayer>();
 		}
 
 		public override void Play()
 		{
-			// get the players
-			SetupPlayers();
+			// setup players and dealer
+			SetupGame();
 
-			// setup dealer
-			SetupDealer();
-
-
+			// while loop
 			bool running = true;
 			while (running)
 			{
-				ResetGame();
+				// place bets
+				PlaceBets();
 
-				// place the bets
-				foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>()) PlayerPlaceBet(p);
+				// deal cards
+				DealCards();
 
-				// deal two cards to each player and the dealer, this includes a check for round 1 BlackJacks
-				DealHands();
+				// draw hand
+				DrawHand();
 
-				// prompt user to hit / stand
-				// user can do this as many times as they like
-				for (CurrentPlayer = 0; CurrentPlayer < Players.Count; CurrentPlayer++)
-				{
-					// draw first here to clear the previous player's turn if any
-					DrawHands();
-					// then take the turn
-					BlackJackPlayer p = (BlackJackPlayer)Players[CurrentPlayer];
-					PlayerTakeTurn(p);
-					p.PlayerState = CheckPlayerHand(p);
+				// hit / stand
+				PlayerTurns();
+				DealerTurn();
 
-				}
+				// check final hands
+				// payout
+				EndGame();
 
-				// Dealer turn
-				DealerTakeTurn();
-
-				// Wrap-up
-				CheckForWinnersAndPayouts();
-
-				// Prompt to play again
-				AskUsersToPlayAgain(ref running);
+				// ask to play again
+				PlayAgain(ref running);
 			}
 		}
 
-		private void CheckForWinnersAndPayouts()
+		private void SetupGame()
 		{
-			// ensures most up to date values are used
-			CheckPlayerHand(TheDealer);
-			bool dealerBust = TheDealer.PlayerState == BlackJackPlayerState.PlayerBust;
-			int dealerValue = TheDealer.CardValues.Sum();
+			// init dealer and get all players
+			TheDealer = new Dealer("Dealer");
+			TheDealer.DealerDeck.Shuffle();
 
-			string line = new string(' ', ColWidth) + TabString;
-
-			for (int i = 0; i < Players.Count; i++)
-			{
-				BlackJackPlayer p = (BlackJackPlayer)Players[i];
-				CheckPlayerHand(p);
-
-				int betAmt = p.CurrentBet;
-				int standardBetReturn = betAmt * 2;
-				int blackJackBetReturn = Convert.ToInt32(betAmt * 2.5);
-				p.CurrentBet = 0;
-				bool addTab = (i != Players.Count - 1);
-
-				if (p.PlayerState == BlackJackPlayerState.BlackJack)
-				{
-					p.Bank += blackJackBetReturn; // returns original bet + 1.5x original bet
-					line += FormatCardNameForDisplay(blackJackBetReturn.ToString(), addTab);
-					continue;
-				}
-
-				if (p.PlayerState == BlackJackPlayerState.PlayerBust)
-				{
-					// player lost
-					line += FormatCardNameForDisplay((0 - betAmt).ToString(), addTab);
-					continue;
-				}
-
-				if (dealerBust)
-				{
-					// any remaining player automatically wins
-					p.Bank += betAmt * 2; // returns original bet + 1.0x original bet
-					line += FormatCardNameForDisplay(standardBetReturn.ToString(), addTab);
-				}
-				else
-				{
-					int playerValue = p.CardValues.Sum();
-					if (playerValue == dealerValue)
-					{
-						p.Bank += betAmt;
-						line += FormatCardNameForDisplay(betAmt.ToString(), addTab);	
-					}
-					else if (playerValue > dealerValue)
-					{
-						p.Bank += betAmt * 2;
-						line += FormatCardNameForDisplay(standardBetReturn.ToString(), addTab);
-					}
-				}
-			}
-			DrawHands();
-			Console.WriteLine(line);
-			Console.ReadLine();
-		}
-
-		private void AskUsersToPlayAgain(ref bool running)
-		{
-
-		}
-
-		private void DealerTakeTurn()
-		{
-			// dealer reveals hole card
-			TheDealer.HoleCardHidden = false;
-			DrawHands();
-
-			Random r = new Random();
-			
-			// then, while the dealer's card's value less than 17, the dealer must hit
 			while (true)
 			{
-				Console.WriteLine(TheDealer.Name + " is thinking...");
-				Thread.Sleep(r.Next(1000, 1500));
-				//MyUtils.ConsoleFunctions.ClearCurrentLine();
-				int cardValues = TheDealer.CardValues.Sum();
-
-				if (cardValues >= DealerTargetValue)
+				string name = MyUtils.ConsoleFunctions.GetTextFromUser("Please enter your name: ");
+				if (name[0] == '_')
 				{
-					Console.WriteLine(TheDealer.Name + " has decided to stand!");
+					for (int i = 0; i < Convert.ToInt32(name[1].ToString()); i++)
+					{
+						Players.Add(new BlackJackPlayer("_" + i.ToString(), 50000));
+					}
 					return;
 				}
-				else
-				{
-					Console.Write(TheDealer.Name + " has decided to hit!");
-					PlayerActionHit(TheDealer);
-					DrawHands();
-					TheDealer.PlayerState = CheckPlayerHand(TheDealer);
-				}
-
-				if (TheDealer.CardValues.Sum() > TargetValue)
-				{
-					Console.WriteLine(TheDealer.Name + " has gone bust!");
-					return;
-				}
+				int bank = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 1000000, "Please tell us how much money you have brought", "Please enter a number between 0 and 1000000.");
+				Players.Add(new BlackJackPlayer(name, bank));
+				if (!MyUtils.ConsoleFunctions.GetBoolFromUser("Would you like to add another player? (y/n)")) break;
 			}
 		}
 
 		private void ResetGame()
 		{
-			TheDealer.Hand.Clear();
+			ClearConsole();
+
 			TheDealer.DealerDeck.ReturnAllCards();
 			TheDealer.DealerDeck.Shuffle();
+			TheDealer.Hand.Clear();
+			TheDealer.HoleCardHidden = true;
 
-			CurrentPlayer = 0;
-			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())  p.Hand.Clear();
-		}
-
-		private void SetupPlayers()
-		{
-			Players = new List<CardGameBasePlayer>();
-			bool addNewPlayer = true;
-			const int MIN_AMT = 10;
-			const int MAX_AMT = 10000;
-			while (addNewPlayer)
+			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
 			{
-				string name = MyUtils.ConsoleFunctions.GetTextFromUser("Please enter your name: ");
-				if (name == "_eoghan")
-				{
-					Players.Add(new BlackJackPlayer("eoghan01", 5000));
-					Players.Add(new BlackJackPlayer("eoghan02", 5000));
-					Players.Add(new BlackJackPlayer("eoghan03", 5000));
-					Console.Clear();
-					return;
-				}
-				int bank = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(MIN_AMT, MAX_AMT, "Welcome, " + name + ". Please enter how much money you've brought with you:", "Please enter a value between " + MIN_AMT.ToString() + " and " + MAX_AMT.ToString());
-				Players.Add(new BlackJackPlayer(name, bank));
-				addNewPlayer = MyUtils.ConsoleFunctions.GetBoolFromUser("Would you like to add another player? (y/n)");
+				p.Hand.Clear();
+				p.CurrentBet = 0;
+				p.PlayerState = BlackJackPlayerState.Playing;
 			}
-			Console.Clear();
 		}
 
-		private void SetupDealer()
+		private void PlaceBets()
 		{
-			TheDealer = new Dealer("Dealer");
-		}
+			// min buy in increases each round
+			int minBuyIn = MinBuyIn * Round;
 
-		private void PlayerPlaceBet(BlackJackPlayer player)
-		{
-			const int MIN_BET = 5;
-			string promptMessage = player.Name + ", what would you like to bet on this game?\nMinimum buy in is currently: " + MIN_BET.ToString() + ", and you have " + player.Bank.ToString() + " remaining in your bank.";
-			string errorMessage = "Please enter a number between " + MIN_BET.ToString() + " and " + player.Bank.ToString();
-			int amt = 0;
-
-			while (true)
+			// get each player's bet
+			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
 			{
-				amt = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(MIN_BET, player.Bank, promptMessage, errorMessage);
-				Console.WriteLine(player.Name + ", you wish to bet " + amt + ". Is this amount correct? (y/n)");
-				if (MyUtils.ConsoleFunctions.GetBoolFromUser()) break;
-				Console.WriteLine("In that case, please enter another amount.");
+				int betAmt = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(minBuyIn, p.Bank,
+					p.Name + ", please enter the amount you wish to bet on this round.\nMinimum buy in is currently: " + minBuyIn.ToString(),
+					"Please enter a number between " + minBuyIn.ToString() + " and " + p.Bank.ToString());
+				p.MakeBet(betAmt);
 			}
-			player.MakeBet(amt);
 		}
 
-		private void PlayerTakeTurn(BlackJackPlayer player)
+		// wait bool is used to deal the cards one by one, if false all cards are dealt and drawn once
+		private void DealCards(bool wait = true)
 		{
-			if (player.PlayerState == BlackJackPlayerState.Playing)
+			// deal two cards to each player and the dealer
+			if (wait)
 			{
-
-				// turn is ended when the player stands, or their card value goes beyond 21
-				int currentCardValueTotal = player.CardValues.Sum();
-				int currentSelection = 0;
-				bool clearLine = false;
-				List<string> options = new List<string> { "Hit", "Stand", "Quit" };
-
-				while (currentCardValueTotal < TargetValue)
+				for (int i = 0; i < 2; i++)
 				{
-
-					// display option list to player
-					if (clearLine) MyUtils.ConsoleFunctions.ClearCurrentLine();
-					clearLine = true;
-					for (int i = 0; i < options.Count; i++)
+					HandColHeight = i + 1;
+					DrawHandGrid(false);
+					foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
 					{
-						if (i == currentSelection)
-						{
-							Console.BackgroundColor = ConsoleColor.Green;
-							Console.ForegroundColor = ConsoleColor.Black;
-						}
-						Console.Write(options[i] + "\t");
-						MyUtils.ConsoleFunctions.ResetConsoleColors();
+						p.Hand.Add(TheDealer.DealerDeck.GetNextCard());
+						DrawHand();
+						Thread.Sleep(250);
 					}
-
-
-					// get player input
-					ConsoleKey pressedKey = MyUtils.ConsoleFunctions.GetConsoleKeyFromUser();
-					bool enterPressed = false;
-					
-					// handle player input
-					switch (pressedKey)
-					{
-						case ConsoleKey.LeftArrow:
-							currentSelection--;
-							if (currentSelection < 0) currentSelection += options.Count;
-							break;
-						case ConsoleKey.RightArrow:
-							currentSelection++;
-							if (currentSelection >= options.Count) currentSelection = 0;
-							break;
-						case ConsoleKey.Enter:
-							enterPressed = true;
-							break;
-					}
-
-					if (enterPressed)
-					{
-						switch (currentSelection)
-						{
-							case 0: //hit
-								PlayerActionHit(player);
-								clearLine = false;
-								break;
-							case 1: // stand
-								return;
-						}
-						currentCardValueTotal = player.CardValues.Sum();
-					}
+					TheDealer.Hand.Add(TheDealer.DealerDeck.GetNextCard());
+					DrawHand();
+					Thread.Sleep(250);
 				}
-			}
-		}
-
-		private void DealHands()
-		{
-			for (int i = 0; i < 2; i++)
-			{
-				// give each player a card
-				foreach (BlackJackPlayer player in Players.Cast<BlackJackPlayer>())
-				{
-					player.Hand.Add(TheDealer.DealerDeck.GetNextCard());
-				}
-
-				// then the dealer
-				TheDealer.Hand.Add(TheDealer.DealerDeck.GetNextCard());
-			}
-
-			foreach (BlackJackPlayer player in Players.Cast<BlackJackPlayer>())
-			{
-				CheckPlayerHand(player);
-			}
-
-			CheckPlayerHand(TheDealer);
-		}
-
-		private void DrawHands()
-		{
-			Console.Clear();
-
-			// define some variables here
-			int totalWidth = 0;
-			int maxCards = 0;
-
-			// draw first line, playernames etc
-			// starting at -1 for the dealer
-			// might not be the best idea...
-			for (int i = -1; i < Players.Count; i++)
-			{
-				// this highlights the current player
-				if (i == CurrentPlayer)
-				{
-					Console.BackgroundColor = ConsoleColor.White;
-					Console.ForegroundColor = ConsoleColor.Black;
-				}
-				string name = "";
-				if (i == -1) // this adds the dealers name
-				{
-					if (TheDealer.Hand.Count > maxCards) maxCards = TheDealer.Hand.Count;
-					name += "  " + TheDealer.Name;
-					switch (TheDealer.PlayerState)
-					{
-						case BlackJackPlayerState.Playing: name += "[P]"; break;
-						case BlackJackPlayerState.BlackJack: name += "[BJ]"; break;
-						case BlackJackPlayerState.PlayerWin: name += "[W]"; break;
-						case BlackJackPlayerState.PlayerBust: name += "[B]"; break;
-					}
-				}
-				else // this adds the player[i]'s name
-				{
-					if (Players[i].Hand.Count > maxCards) maxCards = Players[i].Hand.Count;
-					name += Players[i].Name;
-					BlackJackPlayer p = (BlackJackPlayer)Players[i];
-					switch (p.PlayerState)
-					{
-						case BlackJackPlayerState.Playing: name += "[P]"; break;
-						case BlackJackPlayerState.BlackJack: name += "[BJ]"; break;
-						case BlackJackPlayerState.PlayerWin: name += "[W]"; break;
-						case BlackJackPlayerState.PlayerBust: name += "[B]"; break;
-					}
-				}
-				// write the name and reset the console colors
-				Console.Write(name);
-				MyUtils.ConsoleFunctions.ResetConsoleColors();
-
-				// have to add padding seperately here so it is not highlighted
-				string padding = new string(' ', ColWidth - name.Length);
-				Console.Write(padding);
-
-				// also track the total width for the buffer, a line of "========="
-				totalWidth += ColWidth;
-
-				// only add the tab id this player is not the last player in the list
-				if (i != Players.Count - 1)
-				{
-					Console.Write(TabString);
-					totalWidth += TabString.Length;
-				}
-			}
-
-			if (Console.WindowWidth < totalWidth) Console.WindowWidth = totalWidth + 1;
-
-			// write the buffer below the previous line
-			string buffer = new string('=', totalWidth);
-			Console.WriteLine("\n" + buffer);
-
-			// then gather cards into one string to draw
-			string line = string.Empty;
-			for (int i = 0; i < maxCards; i++)
-			{
-				line = string.Empty;
-				// add the dealer's card
-				if (i < TheDealer.Hand.Count)
-				{
-					if (i == 0 && TheDealer.HoleCardHidden)
-					{
-						// do not reveal the dealer's first card
-						line += FormatCardNameForDisplay("*** *** ***");
-					}
-					else
-					{
-						// this one line gets the dealers card at i, converts it to a string and adds any needed padding, then adds it to the line string
-						line += FormatCardNameForDisplay(TheDealer.Hand[i].ToString() + " " + TheDealer.CardValues[i].ToString());
-					}
-				}
-				else
-				{
-					// this adds a blank space if the dealer has no more cards in their hand
-					line += FormatCardNameForDisplay("");
-				}
-				
-				for (int j = 0; j < Players.Count; j++) 
-				{
-					BlackJackPlayer player = (BlackJackPlayer)Players[j];
-					string s = string.Empty;
-					if (i < player.Hand.Count)
-					{
-						// similar to line above, adds all needed formatting to this player's card
-						line += FormatCardNameForDisplay(player.Hand[i].ToString() + " " + player.CardValues[i].ToString(), (j != Players.Count - 1));
-					}
-					else
-					{
-						line += FormatCardNameForDisplay("", (j != Players.Count - 1));
-					}
-				}
-				Console.WriteLine(line);
-			}
-			// buffer again
-			Console.WriteLine(buffer);
-			line = string.Empty;
-
-			// write the total for each player in the centre of their column
-			// starting with dealer, hiding the hole card value if needed
-			int dealerCardValues = TheDealer.CardValues.Sum();
-			if (TheDealer.HoleCardHidden) { dealerCardValues -= TheDealer.CardValues[0]; }
-			line += FormatHandValueForDisplay(dealerCardValues);
-
-			for (int i = 0; i < Players.Count; i++)
-			{
-				BlackJackPlayer p = (BlackJackPlayer)Players[i];
-				int cardValues = p.CardValues.Sum();
-				line += FormatHandValueForDisplay(cardValues, (i != Players.Count - 1));
-
-				//line += (i != Players.Count - 1) ? FormatHandValueForDisplay(p.CardValues.Sum(), colWidth) + tabString : FormatHandValueForDisplay(p.CardValues.Sum(), colWidth);
-			}
-
-			Console.WriteLine(line);
-			Console.WriteLine(buffer);
-		}
-
-		private void PlayerActionHit(BlackJackPlayer player)
-		{
-			player.Hand.Add(TheDealer.DealerDeck.GetNextCard());
-			CheckPlayerHand(player);
-			DrawHands();
-		}
-
-		private BlackJackPlayerState CheckPlayerHand(BlackJackPlayer player)
-		{
-			player.AssignCardValues();
-			int totalScore = player.CardValues.Sum();
-			if (totalScore > TargetValue) return BlackJackPlayerState.PlayerBust;
-			if (totalScore == TargetValue)
-			{
-				if (player.Hand.Count == 2) return BlackJackPlayerState.BlackJack;
-				else return BlackJackPlayerState.PlayerWin;
-			}
-			return BlackJackPlayerState.Playing;
-		}
-
-		/*
-		private BlackJackPlayerState CheckPlayerHand(BlackJackPlayer player)
-		{
-			int handSize = player.Hand.Count;
-			List<int> results = GetAllHandValues(player);
-
-			if (results.Min() > TargetValue) return BlackJackPlayerState.PlayerBust;
-			if (results.Max())
-
-
-				return BlackJackPlayerState.Playing;
-		}
-
-		private List<int> GetAllHandValues(BlackJackPlayer player)
-		{
-			List<int> output = new List<int>();
-			int numAces = 0;
-			int result = 0;
-
-			for (int i = 0; i < player.Hand.Count; i++)
-			{
-				if (player.Hand[i].Face == CardFace.Ace) numAces++;
-				result += player.Hand[i].GetValue();
-			}
-			output.Add(result);
-
-			while (numAces > 0 && result <= 11)
-			{
-				result += 10;
-				output.Add(result);
-			}
-
-			return output;
-		}
-		*/
-
-		private string FormatCardNameForDisplay(string s, bool addTab = true)
-		{
-			string output = s;
-
-			output += new string(' ', ColWidth - s.Length);
-			if (addTab) output += TabString;
-
-			return output;
-		}
-
-		private string FormatHandValueForDisplay(int cardValue, bool addTab = true)
-		{
-			string output = "  ";
-			if (cardValue > TargetValue)
-			{
-				output += "Bust!";
-			}
-			else if (cardValue == TargetValue)
-			{
-				output += "Winner!";
 			}
 			else
 			{
-				output += "Total Score: " + cardValue.ToString();
+				for (int i = 0; i < 2; i++)
+				{
+					foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
+					{
+						p.Hand.Add(TheDealer.DealerDeck.GetNextCard());
+					}
+					TheDealer.Hand.Add(TheDealer.DealerDeck.GetNextCard());
+				}
 			}
-
-			int remainder = ColWidth - output.Length;
-			output += new string(' ', remainder);
-			if (addTab) output += TabString;
-
-			return output;
+			CheckAllPlayerHands();
+			CheckSinglePlayerHand(TheDealer);
 		}
 
+		private void CheckAllPlayerHands()
+		{
+			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
+			{
+				CheckSinglePlayerHand(p);
+			}
+		}
+
+		private void CheckSinglePlayerHand(BlackJackPlayer p)
+		{
+			int aceAdditionalValue = 10;
+
+			// loop over all cards using ace = 1 first
+			// track the number and position of aces seen
+			List<int> aces = new List<int>();
+			for (int i = 0; i < p.Hand.Count; i++)
+			{
+				p.Hand[i].Value = GetCardValue(p.Hand[i]);
+				if (p.Hand[i].Face == CardFace.Ace) aces.Add(i);
+			}
+			int totalValue = p.Hand.Sum(x => x.Value);
+
+			// if the total value is 11 or less then see if there are any aces, and add 10 to the score and to that ace, until score is greater than 11
+			while (totalValue <= (TargetValue - aceAdditionalValue) && aces.Count != 0)
+			{
+				p.Hand[aces[0]].Value += aceAdditionalValue;
+				aces.RemoveAt(0);
+				totalValue += aceAdditionalValue;
+			}
+
+			UpdatePlayerState(p);
+		}
+
+		private void UpdatePlayerState(BlackJackPlayer p)
+		{
+			// this funciton determines the state of the player's hand based on their score
+			int totalValue = p.Hand.Sum(x => x.Value);
+			if (totalValue == TargetValue)
+			{
+				if (p.Hand.Count == 2) p.PlayerState = BlackJackPlayerState.BlackJack;
+				else p.PlayerState = BlackJackPlayerState.PlayerWin;
+			}
+			else if (totalValue > TargetValue) p.PlayerState = BlackJackPlayerState.PlayerBust;
+			else p.PlayerState = BlackJackPlayerState.Playing;
+		}
+
+		private int GetCardValue(Card c)
+		{
+			// gets the value of a given card
+			if (c.Face == CardFace.Ace) return 1;
+			else if (c.Face >= CardFace.Jack) return 10;
+			else return Convert.ToInt32(c.Face);
+		}
+
+		private void PlayerTurns()
+		{
+			for (CurrentPlayer = 0; CurrentPlayer < Players.Count; CurrentPlayer++)
+			{
+				BlackJackPlayer p = (BlackJackPlayer)Players[CurrentPlayer];
+				PlayerTakeTurn(p);
+			}
+		}
+
+		private void PlayerTakeTurn(BlackJackPlayer p)
+		{
+			List<string> options = new List<string> { "Hit", "Stand" };
+			int selection = 0;
+
+			while (p.PlayerState == BlackJackPlayerState.Playing)
+			{
+				// draw current hands to screen
+				ClearConsole();
+				DrawHand();
+
+				// draw options for current player
+				Console.Write("Current player: ");
+				Console.BackgroundColor = ConsoleColor.Green;
+				Console.ForegroundColor = ConsoleColor.Black;
+				Console.Write(p.Name);
+				MyUtils.ConsoleFunctions.ResetConsoleColors();
+				Console.Write("\n");
+
+				for (int i = 0; i < options.Count; i++)
+				{
+					if (i == selection)
+					{
+						Console.BackgroundColor = ConsoleColor.Green;
+						Console.ForegroundColor = ConsoleColor.Black;
+					}
+					Console.Write(options[i]);
+					if (i + 1 != options.Count) Console.Write("  ");
+					MyUtils.ConsoleFunctions.ResetConsoleColors();
+				}
+
+				// get player input
+				ConsoleKey pressedKey = MyUtils.ConsoleFunctions.GetConsoleKeyFromUser();
+				bool enterPressed = false;
+
+				MyUtils.ConsoleFunctions.ClearLineAt(Console.CursorTop);
+				MyUtils.ConsoleFunctions.ClearLineAt(Console.CursorTop - 1);
+
+				// handle player input
+				switch (pressedKey)
+				{
+					case ConsoleKey.LeftArrow:
+						selection--;
+						if (selection < 0) selection += options.Count;
+						break;
+					case ConsoleKey.RightArrow:
+						selection++;
+						if (selection >= options.Count) selection = 0;
+						break;
+					case ConsoleKey.Enter:
+						enterPressed = true;
+						break;
+				}
+
+				if (enterPressed)
+				{
+					if (selection == 0) HitPlayer(p);
+
+					if (selection == 1) break;
+				}
+			}
+		}
+
+		// wait bool here is to simulate the dealer thinking about their choce
+		private void DealerTurn(bool wait = true)
+		{
+			// the dealer will hit until their hand has a value of 17 or greater
+			// also now reveal the dealer's hole card
+			TheDealer.HoleCardHidden = false;
+			while (TheDealer.Hand.Sum(x => x.Value) < TargetValue)
+			{
+				ClearConsole();
+				DrawHand();
+				Console.Write("Dealer is thinking");
+				if (wait)
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						Thread.Sleep(250);
+						Console.Write('.');
+					}
+					Thread.Sleep(1000);
+				}
+				MyUtils.ConsoleFunctions.ClearCurrentLine();
+				if (TheDealer.Hand.Sum(x => x.Value) >= DealerCutOff ) // the dealer's hand value is greater than or equal to 17
+				{
+					Console.Write("Dealer decides to stand!");
+					if (wait) Thread.Sleep(1000);
+					MyUtils.ConsoleFunctions.ClearCurrentLine();
+					return;
+				}
+				else
+				{
+					Console.Write("Dealer decides to hit!");
+					HitPlayer(TheDealer);
+					if (wait) Thread.Sleep(1000);
+					MyUtils.ConsoleFunctions.ClearCurrentLine();
+				}
+			}
+		}
+
+		private void HitPlayer(BlackJackPlayer p)
+		{
+			p.Hand.Add(TheDealer.DealerDeck.GetNextCard());
+			CheckSinglePlayerHand(p);
+		}
+
+		private void EndGame()
+		{
+			// check all hands one more time to get their final state
+			CheckAllPlayerHands();
+			CheckSinglePlayerHand(TheDealer);
+			int dealerScore = TheDealer.Hand.Sum(x => x.Value);
+			bool dealerBust = dealerScore > TargetValue;
+			DrawHand();
+			// loop over each player, checking first if they are bust or scored a blackjack
+			// then compare their score to dealer, player wins if the dealer is bust and they are not, or if player's score is higher than dealers
+			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>())
+			{
+				/* */if (p.PlayerState == BlackJackPlayerState.PlayerBust) p.LoseBet();
+				else if (p.PlayerState == BlackJackPlayerState.BlackJack)
+				{
+					p.WinBet(2.5f);
+				}
+				else
+				{
+					if (dealerBust && p.PlayerState != BlackJackPlayerState.PlayerBust)
+					{
+						p.WinBet(2.0f);
+					}
+					else
+					{
+						// dealer not bust and player not bust
+						if (dealerScore < p.Hand.Sum(x => x.Value))
+						{
+							p.WinBet(2.0f);
+						}
+						else
+						{
+							p.LoseBet();
+						}
+					}
+				}
+
+			}
+		}
+
+		private void PlayAgain(ref bool running)
+		{
+			// prompt user to play again, and if yes checks that each player has enough in bank to pay the minimum buy in
+			bool playAgain = MyUtils.ConsoleFunctions.GetBoolFromUser("Play again? (y/n)");
+			if (playAgain)
+			{
+				Round++;
+				for (int i = 0; i < Players.Count; i++)
+				{
+					BlackJackPlayer p = (BlackJackPlayer)Players[i];
+					if (p.Bank < MinBuyIn * Round)
+					{
+						Console.WriteLine(p.Name + " does not have enough money in the bank for the next round.");
+						if (MyUtils.ConsoleFunctions.GetBoolFromUser("Would you like to add funds to continue playing? (y/n)"))
+						{
+							int amt = MyUtils.ConsoleFunctions.GetIntFromUserWithBounds(0, 100000);
+							p.Bank += amt;
+						}
+						else
+						{
+							Console.WriteLine("Removing player: " + p.Name);
+							Players.RemoveAt(i);
+							i--;
+						}
+					}
+				}
+				ResetGame();
+			}
+			else
+			{
+				running = false;
+			}
+		}
+
+		//===========
 
 
+		/*
+				// #=====#=====#=====#
+				// |     |     |     | names
+				// |     |     |     | current bets
+				// #=====#=====#=====#
+				// |     |     |     | cards + value
+				// |     |     |     |
+				// |     |     |     |
+				// |     |     |     |
+				// #=====#=====#=====#
+				// |     |     |     | total value
+				// |     |     |     | status
+				// #=====#=====#=====#
+		*/
+		// next two functions draw the dealer and player hands to the console in above format
+		// by moving the cursor around it it possible to draw the grid first and then add the text after
+		private void DrawHand()
+		{
+			if (!GridDrawn) DrawHandGrid();
+			int drawRelativePos = 2;
+			int initialCursorX = Console.CursorLeft;
+			int initialCursorY = Console.CursorTop;
 
+			// create a temp list of all players includeing the dealer
+			List<BlackJackPlayer> AllPlayersIncDealer = new List<BlackJackPlayer> { TheDealer };
+			foreach (BlackJackPlayer p in Players.Cast<BlackJackPlayer>()) AllPlayersIncDealer.Add(p);
 
+			// loop over each element in that list
+			for (int i = 0; i < AllPlayersIncDealer.Count; i++)
+			{
+				BlackJackPlayer p = AllPlayersIncDealer[i];
+				int thisDrawX = drawRelativePos + (ColWidth * i);
+				int thisDrawY = 1;
+				// #=====#=====#=====#
+				// adds a highlight to the current player, +1 because of dealer offset
+				if (i == CurrentPlayer + 1) MyUtils.ConsoleFunctions.SwapConsoleColors();
+				WriteStringAtPosition(p.Name, thisDrawX, thisDrawY);
+				MyUtils.ConsoleFunctions.ResetConsoleColors();
 
+				thisDrawY++;
+				if (i == 0)
+				{
+					// draw the round number under the dealer's name
+					WriteStringAtPosition("Round: " + Round.ToString(), thisDrawX, thisDrawX);
+				}
+				else
+				{ 
+					// only need to draw this line for non dealer players
+					WriteStringAtPosition(p.CurrentBet.ToString(), thisDrawX, thisDrawY);
+				}
+				thisDrawY += 2; // need to add 2 to skip over the grid line
+				// #=====#=====#=====#
+				for (int j = 0; j < p.Hand.Count; j++)
+				{
+					// if the dealer's hole card is still hidden draw ***
+					if (i == 0 && j == 0 && TheDealer.HoleCardHidden) // i == 0 is dealer, j == - is first card, 
+					{
+						WriteStringAtPosition("*** ** ***", thisDrawX, thisDrawY);
+					}
+					else
+					{
+						WriteStringAtPosition(p.Hand[j].ToString() + " " + p.Hand[j].Value.ToString(), thisDrawX, thisDrawY);
+					}
+					thisDrawY++;
+				}
+				thisDrawY = 5 + HandColHeight; // HandColHeight is equal to the largest hand size among all players, adding 5 here to skip 3 grid lines and name / betAmt lines
+				// #=====#=====#=====#
+				int handValue = p.Hand.Sum(x => x.Value);
+				if (i == 0 && TheDealer.HoleCardHidden)
+				{
+					// don't show the value of the hole card!
+					if (TheDealer.Hand.Count > 0) handValue -= TheDealer.Hand[0].Value; 
+				}
+				WriteStringAtPosition(handValue.ToString(), thisDrawX, thisDrawY);
+				thisDrawY++;
+				// displays the player state (plaing, bust, blackjack or win)
+				string s = Enum.GetName(typeof(BlackJackPlayerState), p.PlayerState);
+				WriteStringAtPosition(s, thisDrawX, thisDrawY);
+			}
 
+			// set the cursor back to it's initial position
+			Console.CursorLeft = initialCursorX;
+			Console.CursorTop = initialCursorY;
+		}
 
+		private void DrawHandGrid(bool checkHandCol = true)
+		{
+			// create the strings needed to draw the grid
+			string s = "#" + new string('=', ColWidth - 1);
+			string rowLineString = MyUtils.StringFunctions.RepeatString(s, Players.Count + 1) + "#";
+			s = "|" + new string(' ', ColWidth - 1);
+			string rowEmptyString = MyUtils.StringFunctions.RepeatString(s, Players.Count + 1) + "|";
+			if (Console.WindowWidth < rowEmptyString.Length) Console.WindowWidth = rowEmptyString.Length + 1;
 
+			if (checkHandCol) HandColHeight = Players.Max(x => x.Hand.Count);
 
+			ClearConsole();
+			// top row
+			Console.WriteLine(rowLineString);
+			Console.WriteLine(rowEmptyString);
+			Console.WriteLine(rowEmptyString);
+			// card area
+			Console.WriteLine(rowLineString);
+			for (int i = 0; i < HandColHeight; i++) Console.WriteLine(rowEmptyString);
+			Console.WriteLine(rowLineString);
+			// bottom row
+			Console.WriteLine(rowEmptyString);
+			Console.WriteLine(rowEmptyString);
+			Console.WriteLine(rowLineString);
 
+			GridDrawn = true;
+		}
 
+		// wrapper function to type less
+		private void WriteStringAtPosition(string s, int x, int y)
+		{
+			MyUtils.ConsoleFunctions.WriteStringAtPosition(s, x, y);
+		}
 
-
-
-
-		static readonly int TargetValue = 21;
-		static readonly int DealerTargetValue = 17;
-		public int CurrentPlayer { get; set; }
-		private int ColWidth { get; set; }
-		private string TabString { get; set; }
-		//public List<BlackJackPlayer> Players { get; set; }
-		//public Dealer TheDealer { get; set; }
+		// wrapper function that ensures the grid is drawn after a console.clear
+		private void ClearConsole()
+		{
+			Console.Clear();
+			GridDrawn = false;
+		}
 	}
 }

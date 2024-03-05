@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
@@ -22,7 +23,6 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 			Name = name;
 			Bank = bank;
 			Hand = new List<Card>();
-			CardValues = new List<int>();
 		}
 
 		public bool MakeBet(int amount)
@@ -36,27 +36,23 @@ namespace CS_NET_2_Projects.Assignments.Blackjack_Game_Requirements
 			}
 		}
 
-		public void AssignCardValues()
+		public void LoseBet()
 		{
-			CardValues.Clear();
-			List<int> aces = new List<int>();
+			Console.WriteLine(Name + " lost " + CurrentBet.ToString());
+			PlayerState = BlackJackPlayerState.Waiting;
+			CurrentBet = 0;
+		}
 
-			for (int i = 0; i < Hand.Count; i++)
-			{
-				if (Hand[i].Face == CardFace.Ace) aces.Add(i);
-				CardValues.Add(Hand[i].GetValue());
-			}
-
-			while (aces.Count > 0 && CardValues.Sum() <= 11)
-			{
-				CardValues[aces[0]] += 10;
-				aces.RemoveAt(0);
-			}
+		public void WinBet(float multiplier)
+		{
+			PlayerState = BlackJackPlayerState.Waiting;
+			int winnings = Convert.ToInt16(CurrentBet * multiplier);
+			Console.WriteLine(Name + " winnings: " + winnings);
+			CurrentBet = 0;
+			Bank += winnings;
 		}
 
 		public BlackJackPlayerState PlayerState { get; set; }
-		public List<int> CardValues { get; set; }
-		public int FinalScore { get; set; }
 		public int Bank { get; set; }
 		public int CurrentBet { get; set; }
 	}
